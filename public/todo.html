@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ToDo - ToDo App</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #111;
+    }
+
+    .navbar {
+      background-color: #6B0F9C;
+      padding: 10px;
+    }
+
+    .navbar a {
+      color: #fff;
+      text-decoration: none;
+      margin-right: 20px;
+    }
+
+    .navbar a:hover {
+      color: #E0B0FF;
+    }
+
+    .container {
+      padding: 20px;
+      color: #fff;
+      text-align: center;
+    }
+
+    .todo-form {
+      margin-top: 50px;
+    }
+
+    .input-box {
+      width: 300px;
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #6B0F9C;
+      border-radius: 5px;
+      color: #fff;
+      background-color: transparent;
+      outline: none;
+    }
+
+    .priority-select {
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #6B0F9C;
+      border-radius: 5px;
+      color: #fff;
+      background-color: transparent;
+      outline: none;
+    }
+
+    .add-button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      background-color: #6B0F9C;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .add-button:hover {
+      background-color: #7C23B7;
+    }
+
+    .todo-list {
+      list-style-type: none;
+      padding: 0;
+      margin-top: 30px;
+      text-align: left;
+    }
+
+    .todo-item {
+      background-color: #6B0F9C;
+      padding: 10px;
+      margin: 10px;
+      margin-left: 20%;
+      margin-right: 20%;
+      border-radius: 5px;
+    }
+    .icons {
+  display: flex; /* Use flexbox to align the buttons horizontally */
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
+  </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/">Home</a>
+        <a href="/contact">Contact</a>
+        <a href="/about">About</a>
+        <a href="todo">ToDo</a>
+      </nav>
+    
+
+  <div class="container">
+    <h1>ToDo List</h1>
+    <div class="todo-form">
+      <select id="selectId" class="priority-select">
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+      <input id="todoIp" type="text" class="input-box" placeholder="Enter your task...">
+      <button id="btnId" class="add-button">Add Task</button>
+    </div>
+
+    <ul id="todo-items" class="todo-list">
+
+      <!-- <li class="todo-item">
+            HUEHUEHUE
+            <div class="icons">
+            <button class="icon-button" ><i class="fas fa-edit" ></i></button>
+            <button class="icon-button"><i class="fas fa-times"></i></button>
+        </div> -->
+     </li>
+
+    </ul>
+  </div>
+  <script src="../scripts/todoScript.js" ></script>
+</body>
+</html>
