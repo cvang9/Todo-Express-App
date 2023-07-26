@@ -1,8 +1,14 @@
 const express = require("express");
 const fs = require("fs")
+var session = require('express-session')
 
-// What and Why?
-const app = express();
+var app = express()
+
+app.use(session({
+  secret: 'keyboard cat',
+  resave: false,
+  saveUninitialized: true,
+}))
 
 app.use( function(req,res, next ) {
     console.log(req.url, req.method );
@@ -10,8 +16,16 @@ app.use( function(req,res, next ) {
 })
 
 app.use(express.json());
+app.use(express.urlencoded({extended:false}));
 
 app.post('/todo', function( req, res){
+
+    console.log( 'Post todo =>'+req.session.isLoggedIn)
+
+    if( !req.session.isLoggedIn )
+    {
+        res.status(401).json({result:'LogIn first'});
+    }
 
     writeToFile( req.body, function( err ){
         if( err ){
@@ -23,49 +37,29 @@ app.post('/todo', function( req, res){
     });
 
     
-//     fs.readFile( './db/logs.json', 'utf-8', function( err, data ) {
-//         if( err ){
-
-//             // Check
-//             res.status(500).json({
-//                 message: "some error ocuured while reading the file"
-//             });
-//             return;
-//         }
-
-//         if( data.length === 0 )
-//         {
-//             data = "[]";
-//         }
-
-//         try{
-//             data = JSON.parse(data);
-//             data.push(req.body);
-
-//             fs.writeFile( './db/logs.json', JSON.stringify(data), function( err ){
-                
-//                 if(err){
-//                     res.status(500).json({
-//                         message: "Internal Server Error"
-//                     });
-//                     return;
-//                 }
-
-//                 res.status(200).json({
-//                     message: "Data sent successfully to the server"
-//                 });
-//             });
-//         }
-//         catch(err){
-//             res.status(500).json({
-//                 message:"Internal Server Error"
-//             })
-//         }
-
-//     })
 });
 
+app.get( '/signout', function( req, res ){
+
+    if( !req.session.isLoggedIn )
+    {
+        res.redirect('/login');
+        return;
+    }
+    res.clearCookie('connect.sid');
+    res.redirect('/login');
+    return;
+} )
+
 app.get( '/tododata', function( req, res ) {
+
+    console.log( 'Data todo =>'+req.session.isLoggedIn);
+
+    if( !req.session.isLoggedIn )
+    {
+        res.status(401).send('Log In first');
+        return;
+    }
 
     readAllDataFromFile( function(err, data){
 
@@ -82,6 +76,14 @@ app.get( '/tododata', function( req, res ) {
 
 app.post('/editdata', function( req ,res) {
 
+    console.log( ' edit Data =>'+req.session.isLoggedIn);
+
+    if( !req.session.isLoggedIn )
+    {
+        res.status(401).json({result:'Please log In'});
+        return;
+    }
+
     readAllDataFromFile( function( err, data ) {
         if( err )
         {
@@ -97,7 +99,7 @@ app.post('/editdata', function( req ,res) {
                 {
                     data[idx].task = obj.data;
                 }
-            })
+            });
 
             fs.writeFile( './db/logs.json', JSON.stringify(data), function(err) {
                 if(err){
@@ -105,12 +107,18 @@ app.post('/editdata', function( req ,res) {
                     return;
                 }
 
-                res.status(200).json({update:'success'})
+                res.status(200).json(data)
             });
     });
 })
 
 app.post( '/deletetodo', function( req, res ) {
+
+    if( !req.session.isLoggedIn )
+    {
+        res.status(401).json({result:'Please log In'});
+        return;
+    }
 
     const selectedId = req.body.id;
 
@@ -140,37 +148,169 @@ app.post( '/deletetodo', function( req, res ) {
     })
 })
 
-app.get('/', function( req, res ){
+app.get( '/signup', function( req, res){
+    res.sendFile(__dirname + '/public/signup.html')
+});
+
+app.post('/signup', async function( req, res) {
     
-    res.sendFile(__dirname + '/public/home.html')
+    try {
+        const data = await readAllDataFromFilePr( './db/users.json');
+        let flag = true;
+
+        data.forEach( function(user){
+
+            if( user.username === req.body.username && user.password === req.body.password )
+            {
+                res.status(401).json({result:'User already exist'} );
+                flag = false;
+            }
+        });
+
+
+    if (flag) {
+
+            data.push(req.body);
+            fs.writeFileSync('./db/users.json', JSON.stringify(data), function(err){
+                if(err){
+                    res.status(500).json({result:'error in  writing a file'});
+                }
+            });
+            res.redirect('/login');
+    }
+
+    } catch (error) {
+        res.status(500).json({result:'error in  reading a file'});
+    }
+
 })
 
+
+app.get('/', function( req, res ){
+    
+    if( !req.session.isLoggedIn )
+    {
+        res.redirect('/login');
+        return;
+    }
+
+    res.sendFile(__dirname + '/public/home.html');
+})
+
+app.get('/login', function( req,res ){
+    res.sendFile( __dirname + '/public/login.html');
+})
+
+
+app.post('/login', async function( req,res ){
+
+    console.log( 'Login =>'+req.session.isLoggedIn)
+    
+    try {
+
+        let flag = false;
+        const data = await readAllDataFromFilePr('./db/users.json');
+
+        data.forEach( function( user ){
+            
+            if( user.username === req.body.username && user.password === req.body.password )
+            {
+                req.session.isLoggedIn = true;
+                req.session.username = user.username;
+                res.redirect('/');
+                flag = true;
+            }
+        });
+
+        if (!flag) {
+            res.status(401).json({result:'wrong credentials'});
+        }
+    } catch (error) {
+        // res.status(500).json({result:" Error in  reading a file"})
+        throw error;
+    }
+});
+
+
 app.get('/about', function( req, res ){
+
+    if( !req.session.isLoggedIn )
+    {
+        res.redirect('/login');
+        return;
+    }
     
     res.sendFile(__dirname + '/public/about.html')
 })
 
 app.get('/contact', function( req, res ){
+
+    if( !req.session.isLoggedIn )
+    {
+        res.redirect('/login');
+        return;
+    }
     
     res.sendFile(__dirname + '/public/contact.html')
 })
 
 app.get('/todo', function( req, res ){
-    
-    res.sendFile(__dirname + '/public/todo.html')
-})
+
+    console.log( 'Todo =>'+req.session.isLoggedIn)
+
+    if( !req.session.isLoggedIn )
+    {
+        res.status(401).send({result:'Not logged in'})
+        return;
+    }
+    else{
+        res.sendFile(__dirname + '/public/todo.html');
+    }
+     
+});
 
 app.get('/scripts/todoScript.js', function( req, res){
+
     res.sendFile(__dirname + '/scripts/todoScript.js')
 } )
 
 app.listen( 3000, function() {
-    console.log("Server is running on localhost:3000");
+    console.log("Server is running on http://localhost:3000");
 })
 
-function readAllDataFromFile( callback )
+
+function readAllDataFromFilePr( path )
 {
-    fs.readFile( './db/logs.json', 'utf-8', function(err,data) {
+    return new Promise( function( resolve, reject ){
+
+        fs.readFile( path, 'utf-8', function(err,data) {
+            if( err )
+            {
+                reject( err );
+            }
+            else{
+                if( data.length === 0 )
+                {
+                    data = "[]"
+                }
+                
+                try{
+                    data = JSON.parse(data);
+                    resolve(data);
+                }
+                catch(err){
+                    reject(err);
+                }
+                
+            }
+         });
+
+    })
+}
+
+function readAllDataFromFile( callback, path='./db/logs.json' )
+{
+    fs.readFile( path, 'utf-8', function(err,data) {
         if( err )
         {
             callback( err );

@@ -37,6 +37,13 @@ submitButton.addEventListener( 'click' , function() {
         {
             showInUI(data);
         }
+        else if( response.status === 401 )
+        {
+            alert('please log in first : todo');
+        }
+        else{
+            alert('err at todo')
+        }
     } );
     
 })
@@ -89,8 +96,11 @@ function showInUI(todo)
             }).then(function(response) {
                   if( response.status === 200 )
                   {
-                    window.location.reload();
+                    window.location.reload()
                   }
+                  else if( response.status === 401 ){
+                    alert('log in first');
+                }
                   else{
                     alert('Something went wrong in updating the task')
                   }
@@ -113,7 +123,10 @@ function showInUI(todo)
         }).then( function(response){
             if( response.status === 200 )
             {
-                window.location.reload();
+                window.location.reload()
+            }
+            else if( response.status === 401 ){
+                alert('log in first');
             }
             else{
                 alert('Something wrong in todo')
@@ -125,11 +138,18 @@ function showInUI(todo)
 
 console.log('i am todoScript ')
 
-fetch('/tododata')
+
+function fetchData()
+{
+    fetch('/tododata')
 .then( function(res){
     if( res.status === 200 )
     {
         return res.json();
+    }
+    else if( res.status === 401 )
+    {
+        alert('Log In first ');
     }
     else{
         alert("something went wrong");
@@ -142,3 +162,6 @@ fetch('/tododata')
         showInUI(todo);
     });
 });
+}
+
+fetchData();
