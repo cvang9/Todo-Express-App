@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+    font-family: Arial, sans-serif;
+    background-color: #3a3a3a;
+    color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    }
+
+    .login-form {
+    background-color: #482d63;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    position: relative; /* Required for absolute positioning of the extra-effect div */
+    overflow: hidden; /* Hide the overflowing part of the extra-effect div */
+    }
+
+    h2 {
+    color: #ffcc00;
+    margin-bottom: 30px;
+    }
+
+    input {
+    padding: 10px;
+    margin-bottom: 20px;
+    width: 100%;
+    border: none;
+    border-radius: 5px;
+    }
+
+    button {
+    padding: 10px 20px;
+    background-color: #8e24aa;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    }
+
+    button:hover {
+    background-color: #5e156b;
+    }
+
+  </style>
+</head>
+<body>
+
+
+    <div class="login-form">
+      <h2>Login</h2>
+      <form method="post">
+        <input type="text" placeholder="Username" required name="username">
+        <input type="password" placeholder="Password" required name="password">
+
+        <% if( error ) { %>
+            <div>
+                <p style="color: red;"> <%=error %> </p>
+            </div>
+         <% } %>
+         
+        <button type="submit">Login</button>
+      </form>
+      <br/>
+      <button  onclick="redirectToSignup()">Signup</button>
+    </div>
+  
+    <script>
+
+        // Call the function to show the popup
+        
+      function redirectToSignup() {
+        window.location.href = "/signup";
+      }
+    </script>
+  </body>
+  </html>

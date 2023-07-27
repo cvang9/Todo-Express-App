@@ -4,6 +4,8 @@ var session = require('express-session')
 
 var app = express()
 
+app.set('view engine', 'ejs' );
+
 app.use(session({
   secret: 'keyboard cat',
   resave: false,
@@ -149,7 +151,7 @@ app.post( '/deletetodo', function( req, res ) {
 })
 
 app.get( '/signup', function( req, res){
-    res.sendFile(__dirname + '/public/signup.html')
+    res.render('signup', {error: null })
 });
 
 app.post('/signup', async function( req, res) {
@@ -162,7 +164,7 @@ app.post('/signup', async function( req, res) {
 
             if( user.username === req.body.username && user.password === req.body.password )
             {
-                res.status(401).json({result:'User already exist'} );
+                res.render('signup', {error: 'User already exists'})
                 flag = false;
             }
         });
@@ -194,17 +196,16 @@ app.get('/', function( req, res ){
         return;
     }
 
-    res.sendFile(__dirname + '/public/home.html');
+    res.render('home', {username: req.session.username});
 })
 
 app.get('/login', function( req,res ){
-    res.sendFile( __dirname + '/public/login.html');
+    res.render('login', {error:null});
 })
 
 
 app.post('/login', async function( req,res ){
 
-    console.log( 'Login =>'+req.session.isLoggedIn)
     
     try {
 
@@ -223,7 +224,7 @@ app.post('/login', async function( req,res ){
         });
 
         if (!flag) {
-            res.status(401).json({result:'wrong credentials'});
+            res.render('login', {error:'Invalid User credentials'});
         }
     } catch (error) {
         // res.status(500).json({result:" Error in  reading a file"})
@@ -240,7 +241,7 @@ app.get('/about', function( req, res ){
         return;
     }
     
-    res.sendFile(__dirname + '/public/about.html')
+    res.render('about', {username: req.session.username})
 })
 
 app.get('/contact', function( req, res ){
@@ -251,7 +252,7 @@ app.get('/contact', function( req, res ){
         return;
     }
     
-    res.sendFile(__dirname + '/public/contact.html')
+    res.render('contact', {username: req.session.username })
 })
 
 app.get('/todo', function( req, res ){
@@ -260,11 +261,11 @@ app.get('/todo', function( req, res ){
 
     if( !req.session.isLoggedIn )
     {
-        res.status(401).send({result:'Not logged in'})
+        res.redirect('/login');
         return;
     }
     else{
-        res.sendFile(__dirname + '/public/todo.html');
+        res.render('todo',{username:req.session.username})
     }
      
 });
