@@ -4,60 +4,73 @@ const prioritySelect = document.getElementById('selectId');
 const todoList = document.getElementById('todo-items')
 
 
-submitButton.addEventListener( 'click' , function() {
+// submitButton.addEventListener( 'click' , function() {
 
-    const task = todoInput.value;
-    todoInput.value = '';
-    const priority = prioritySelect.value;
+//     const task = todoInput.value;
+//     // todoInput.value = '';
+//     const priority = prioritySelect.value;
 
-    if( !task || !priority )
-    {
-        alert('Enter the Task and choose the priority !')
-    }
+//     if( !task || !priority )
+//     {
+//         alert('Enter the Task and choose the priority !')
+//     }
 
-    let id = Math.floor(Math.random() * 10000000000000001)
+//     let id = Math.floor(Math.random() * 10000000000000001)
 
-    const data = {
-        id,
-        task,
-        priority
-    }
+    // const data = {
+    //     id,
+    //     task,
+    //     priority
+    // }
 
-    fetch('/todo', {
+//     fetch('/todo', {
 
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    }).then(function(response) {
+//         method: 'POST',
+//         headers: {
+//             'Content-Type': 'application/json'
+//         },
+//         body: JSON.stringify(data)
+//     }).then(function(response) {
 
-        console.log(response)
-        if( response.status = 200 )
-        {
-            showInUI(data);
-        }
-        else if( response.status === 401 )
-        {
-            alert('please log in first : todo');
-        }
-        else{
-            alert('err at todo')
-        }
-    } );
+//         console.log(response)
+//         if( response.status = 200 )
+//         {
+//             showInUI(data);
+//         }
+//         else if( response.status === 401 )
+//         {
+//             alert('please log in first : todo');
+//         }
+//         else{
+//             alert('err at todo')
+//         }
+//     } );
     
-})
+// })
 
 function showInUI(todo)
 {
+
+    const image = document.createElement('img');
+    image.setAttribute('src',todo.filename );
+    image.setAttribute('alt', "Small Image" );
+    image.setAttribute('width', "50" );
+    image.setAttribute('height', "50" );
+    image.setAttribute('style', "max-width: 100%; max-height: 100%; object-fit: cover; margin-left: auto; margin-right: 10px" );
+
+
     const element = document.createElement('li');
+    element.style.display = 'flex'
     element.innerText = todo.task;
     element.className = 'todo-item'
     todoList.appendChild(element);
 
     const dive = document.createElement('div');
+    dive.setAttribute('margin-left', "auto" );
     dive.className = 'icons'
+    element.append(image);
     element.append(dive);
+    
 
 
     const editButton = document.createElement('button');

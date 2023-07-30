@@ -1,18 +1,38 @@
-<%- include('partials/header') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ToDo App</title>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/">Home</a>
+    <a href="/contact">Contact</a>
+    <a href="/about">About</a>
+    <a href="todo">ToDo</a>
+    <a href="/signout" style="margin-right: 20px; color: #fff; text-decoration: none;">Sign Out</a>
+    <p style="color: white; text-align: center;">Welcome <%=username%></p>
+    
+  </nav>
+
+<!-- <%- include('partials/header') %> -->
+
 <div class="container">
     <h1>ToDo List</h1>
-    <div class="todo-form">
-      <select id="selectId" class="priority-select">
+
+    <form action="/addtodoImg" method="post" class="todo-form" enctype="multipart/form-data" >
+      <select id="selectId" class="priority-select" name="priority">
         <option value="high">High</option>
         <option value="medium">Medium</option>
         <option value="low">Low</option>
       </select>
-      <input id="todoIp" type="text" class="input-box" placeholder="Enter your task...">
-      <button id="btnId" class="add-button">Add Task</button>
-    </div>
+      <input id="todoIp" type="text" class="input-box" placeholder="Enter your task..." name="task">
+      <input type="file" name="todoImg" id="imgId" class="add-button" ></input>
+      <button id="btnId" type="submit" class="add-button">Add Task</button>
+    </form>
 
     <ul id="todo-items" class="todo-list">
-
 
     </ul>
   </div>
@@ -94,6 +114,7 @@
       padding: 0;
       margin-top: 30px;
       text-align: left;
+      color: white;
     }
 
     .todo-item {
@@ -105,9 +126,8 @@
       border-radius: 5px;
     }
     .icons {
-  display: flex; 
   margin-top: 10px;
-  margin-right: 10px;
+  margin-left: auto;
 }
 
   </style>

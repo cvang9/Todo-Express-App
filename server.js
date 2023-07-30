@@ -1,6 +1,9 @@
 const express = require("express");
 const fs = require("fs")
-var session = require('express-session')
+const session = require('express-session')
+const multer = require('multer');
+const upload = multer({dest:'uploads/'});
+
 
 var app = express()
 
@@ -19,27 +22,33 @@ app.use( function(req,res, next ) {
 
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
+app.use(upload.single('todoImg'));
+app.use(express.static('uploads'));
 
-app.post('/todo', function( req, res){
+app.post('/addtodoImg', function(req, res){
 
-    console.log( 'Post todo =>'+req.session.isLoggedIn)
+    const task = req.body.task
+    const priority = req.body.priority;
+    const id = Math.floor(Math.random() * 10000000000000001)
+    const filename = req.file.filename
 
-    if( !req.session.isLoggedIn )
-    {
-        res.status(401).json({result:'LogIn first'});
+    const data = {
+        id,
+        task,
+        priority,
+        filename
     }
 
-    writeToFile( req.body, function( err ){
+    writeToFile( data, function( err ){
         if( err ){
-            res.status(500).send('error')
-            return;
+            throw err;
         }
 
-        res.status(200).send('success')
+        res.redirect('/todo');
     });
-
-    
+ 
 });
+
 
 app.get( '/signout', function( req, res ){
 

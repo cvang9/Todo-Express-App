@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -125,5 +125,182 @@
     </ul>
   </div>
   <script src="../scripts/todoScript.js" ></script>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- The existing head content remains the same -->
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #111;
+      display: flex;
+     justify-content: center;
+    }
+
+    .navbar {
+      background-color: #6B0F9C;
+      padding: 10px;
+    }
+
+    .navbar a {
+      color: #fff;
+      text-decoration: none;
+      margin-right: 20px;
+    }
+
+    .navbar a:hover {
+      color: #E0B0FF;
+    }
+
+    .container {
+      padding: 20px;
+      color: #fff;
+      text-align: center;
+    }
+
+    .todo-form {
+      margin-top: 50px;
+    }
+
+    .input-box {
+      width: 300px;
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #6B0F9C;
+      border-radius: 5px;
+      color: #fff;
+      background-color: transparent;
+      outline: none;
+    }
+
+    .priority-select {
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #6B0F9C;
+      border-radius: 5px;
+      color: #fff;
+      background-color: transparent;
+      outline: none;
+    }
+
+    .add-button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      background-color: #6B0F9C;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .add-button:hover {
+      background-color: #7C23B7;
+    }
+
+    .todo-list {
+      list-style-type: none;
+      padding: 0;
+      margin-top: 30px;
+      text-align: left;
+    }
+
+    .todo-item {
+      background-color: #6B0F9C;
+      padding: 10px;
+      margin: 10px;
+      margin-left: 20%;
+      margin-right: 20%;
+      border-radius: 5px;
+    }
+    .icons {
+  display: flex; /* Use flexbox to align the buttons horizontally */
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
+.container {
+  /* Existing styles */
+  display: flex;
+  flex-direction: column;
+}
+
+.todo-list-section, .todo-form-section {
+  /* Shared styles for both sections */
+  margin: 20px;
+  padding: 20px;
+  background-color: #6B0F9C;
+  border-radius: 5px;
+  color: #fff;
+  text-align: center;
+}
+
+.todo-list-section h2, .todo-form-section h2 {
+  /* Heading styles */
+  margin-bottom: 10px;
+}
+
+.todo-list-section img, .todo-form-section img {
+  /* Image styles */
+  width: 200px;
+  height: auto;
+  margin-top: 20px;
+}
+
+.todo-list-section {
+  /* Adjust the width to fit your design */
+  width: 45%;
+}
+
+.todo-form-section {
+  /* Adjust the width to fit your design */
+  width: 45%;
+}
+
+.todo-form {
+  /* Existing styles */
+  margin-top: 20px;
+}
+
+
+  </style>
+  
+</head>
+<body>
+  <nav class="navbar">
+    <!-- The existing navbar content remains the same -->
+  </nav>
+
+  <div class="container">
+    <h1>ToDo List</h1>
+    <!-- Section 1: List of Todos -->
+    <div class="todo-list-section">
+      <h2>My Todos</h2>
+      <ul id="todo-items" class="todo-list"></ul>
+      <img src="path_to_your_todo_list_image.png" alt="Todo List Image">
+    </div>
+
+    <!-- Section 2: Todo Form -->
+    <div class="todo-form-section">
+      <h2>Add New Task</h2>
+      <div class="todo-form">
+        <select id="selectId" class="priority-select">
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+        <input id="todoIp" type="text" class="input-box" placeholder="Enter your task...">
+        <button id="btnId" class="add-button">Add Task</button>
+        <img src="path_to_your_todo_form_image.png" alt="Todo Form Image">
+      </div>
+    </div>
+  </div>
+  <script src="../scripts/todoScript.js"></script>
 </body>
 </html>
