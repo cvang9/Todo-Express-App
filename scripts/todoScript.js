@@ -75,10 +75,16 @@ function showInUI(todo)
 
     const editButton = document.createElement('button');
     const deleteButton = document.createElement('button');
-    editButton.className = 'icon-button';
-    deleteButton.className = 'icon-button';
+    const tickButton = document.createElement('button');
+    editButton.className = 'icon-button edit-btn';
+    deleteButton.className = 'icon-button remove-btn';
+    tickButton.className = 'icon-button tick-btn';
     dive.appendChild(editButton);
     dive.appendChild(deleteButton);
+    dive.appendChild(tickButton);
+
+
+    
 
     const editIcon = document.createElement('i');
     editIcon.className = 'fas fa-edit';
@@ -88,6 +94,17 @@ function showInUI(todo)
     deleteIcon.className = 'fas fa-times';
     deleteButton.appendChild(deleteIcon);
 
+    const tickIcon = document.createElement('i');
+    tickIcon.className = 'fas fa-check';
+    tickButton.appendChild(tickIcon);
+
+    if( todo.saved === 'yes' )
+    {
+        const listItem = tickButton.closest(".todo-item");
+
+        // Toggle the completed class
+        listItem.classList.add("completed");
+    }
 
     editButton.addEventListener('click', function(){
         // console.log(todo.id);
@@ -146,6 +163,25 @@ function showInUI(todo)
             }
         });
 
+    })
+
+    tickButton.addEventListener( 'click', function(){
+
+                    // Get the parent list item
+                    const listItem = tickButton.closest(".todo-item");
+
+                    // Toggle the completed class
+                    listItem.classList.add("completed");
+
+                    let idObj = {
+                        id: todo.id
+                    }
+
+                    fetch( '/taskDone', {
+                        method: 'POST',
+                        headers: { 'Content-Type':'application/json'},
+                        body: JSON.stringify(idObj)
+                    } ).then( function(response){} );
     })
 }
 

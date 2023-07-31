@@ -36,7 +36,8 @@ app.post('/addtodoImg', function(req, res){
         id,
         task,
         priority,
-        filename
+        filename,
+        saved: 'no'
     }
 
     writeToFile( data, function( err ){
@@ -122,6 +123,39 @@ app.post('/editdata', function( req ,res) {
             });
     });
 })
+
+app.post('/taskDone', function( req, res){
+
+    readAllDataFromFile( function(err, data){
+        if( err )
+        {
+            res.status(500).json({result:'Failure in reading the file'});
+            return;
+        }
+
+        data.forEach( function(todo,idx){
+
+            let a = todo.id;
+            let b = req.body.id;
+
+            if( todo.id === req.body.id ){
+                data[idx].saved = 'yes';
+            }
+        });
+
+       fs.writeFile('./db/logs.json', JSON.stringify(data), function(err){
+        if(err)
+        {
+            res.status(500).json({result:'Failure in writing the file'});
+            return;
+        }
+
+        res.status(200).json({result:'Data updated successfully'})
+
+       });
+    });
+
+});
 
 app.post( '/deletetodo', function( req, res ) {
 
