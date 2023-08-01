@@ -53,7 +53,7 @@ app.post('/addtodoImg', function(req, res){
     const task = req.body.task
     const priority = req.body.priority;
 
-    if( !task || ! priority || !req.file )
+    if( !task || ! priority || !req.file || task.replace(/\s+/g, '').length === 0 )
     {
         res.render('todo',{username:req.session.username, error:'Enter todo details properly'});
         return;
