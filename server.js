@@ -2,7 +2,30 @@ const express = require("express");
 const fs = require("fs")
 const session = require('express-session')
 const multer = require('multer');
-const upload = multer({dest:'uploads/'});
+
+
+const multerStorage = multer.diskStorage({
+    destination: function(req,file,callback){
+        callback(null,__dirname+'/uploads');
+    },
+    filename: function( req, file, callback ){
+        callback( null, file.originalname );
+    },
+})
+
+function filter( req, file, cb )
+{
+    if( file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg' || file.mimetype === 'image/png' )
+    {
+        cb( null, true );
+    }
+    else{
+        cb( null, false );
+    }
+}
+
+const upload = multer({storage: multerStorage, fileFilter: filter });
+
 
 
 var app = express()
@@ -29,8 +52,18 @@ app.post('/addtodoImg', function(req, res){
 
     const task = req.body.task
     const priority = req.body.priority;
-    const id = Math.floor(Math.random() * 10000000000000001)
-    const filename = req.file.filename
+
+    if( !task || ! priority || !req.file )
+    {
+        res.render('todo',{username:req.session.username, error:'Enter todo details properly'});
+        return;
+    }
+
+    const id = Math.floor(Math.random() * 10000000000000001);
+
+    console.log(req.file);
+
+    const filename = req.file.originalname;
 
     const data = {
         id,
@@ -308,7 +341,7 @@ app.get('/todo', function( req, res ){
         return;
     }
     else{
-        res.render('todo',{username:req.session.username})
+        res.render('todo',{username:req.session.username, error:null})
     }
      
 });

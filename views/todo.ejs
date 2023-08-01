@@ -1,25 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ToDo App</title>
-</head>
-<body>
-  <nav class="navbar">
-    <a href="/">Home</a>
-    <a href="/contact">Contact</a>
-    <a href="/about">About</a>
-    <a href="todo">ToDo</a>
-    <a href="/signout" style="margin-right: 20px; color: #fff; text-decoration: none;">Sign Out</a>
-    <p style="color: white; text-align: center;">Welcome <%=username%></p>
-    
-  </nav>
 
-<!-- <%- include('partials/header') %> -->
+<%- include('partials/header') %>
 
 <div class="container">
     <h1>ToDo List</h1>
+
+    <% if( error ) { %>
+        <h2 style="color: red;"><%- error %> </h2>
+    <% } %>
 
     <form action="/addtodoImg" method="post" class="todo-form" enctype="multipart/form-data" >
       <select id="selectId" class="priority-select" name="priority">
