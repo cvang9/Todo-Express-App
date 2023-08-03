@@ -113,7 +113,7 @@ function showInUI(todo)
         if( data ){
 
             const task = {
-                id: todo.id,
+                id: todo._id.toString(),
                 data: data
             }
 
@@ -141,7 +141,7 @@ function showInUI(todo)
     deleteButton.addEventListener( 'click', function() {
         
         const obj ={
-            id: todo.id
+            id: todo._id.toString()
         }
 
         fetch( '/deletetodo', {
@@ -174,7 +174,7 @@ function showInUI(todo)
                     listItem.classList.add("completed");
 
                     let idObj = {
-                        id: todo.id
+                        id: todo._id.toString()
                     }
 
                     fetch( '/taskDone', {

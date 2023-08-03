@@ -1,8 +1,21 @@
 const express = require("express");
-const fs = require("fs")
-const session = require('express-session')
+const session = require('express-session');
 const multer = require('multer');
+const mongodb = require('./db/connectdb.js');
+const UserModel = require('./db/users/users.js');
+const TaskModel = require('./db/tasks/tasks.js');
 
+
+mongodb.init()
+.then( function() {
+    console.log('Mongo is running')
+    app.listen( 3000, function() {
+        console.log("Server is running on http://localhost:3000");
+    });    
+})
+.catch( function(err){
+    console.log(err);
+});
 
 const multerStorage = multer.diskStorage({
     destination: function(req,file,callback){
@@ -48,7 +61,7 @@ app.use(express.urlencoded({extended:false}));
 app.use(upload.single('todoImg'));
 app.use(express.static('uploads'));
 
-app.post('/addtodoImg', function(req, res){
+app.post('/addtodoImg', async function(req, res){
 
     const task = req.body.task
     const priority = req.body.priority;
@@ -61,27 +74,27 @@ app.post('/addtodoImg', function(req, res){
 
     const id = Math.floor(Math.random() * 10000000000000001);
 
-    console.log(req.file);
 
     const filename = req.file.originalname;
 
     const data = {
-        id,
         task,
         priority,
         filename,
         saved: 'no'
     }
+    
 
-    writeToFile( data, function( err ){
-        if( err ){
-            throw err;
-        }
+     try {
+        const result = await TaskModel.create(data);
+        console.log(result._id.toString()  );
+     } catch (error) {
+        console.log(error)
+     }
 
         res.redirect('/todo');
-    });
- 
 });
+ 
 
 
 app.get( '/signout', function( req, res ){
@@ -96,7 +109,7 @@ app.get( '/signout', function( req, res ){
     return;
 } )
 
-app.get( '/tododata', function( req, res ) {
+app.get( '/tododata', async function( req, res ) {
 
     console.log( 'Data todo =>'+req.session.isLoggedIn);
 
@@ -106,20 +119,12 @@ app.get( '/tododata', function( req, res ) {
         return;
     }
 
-    readAllDataFromFile( function(err, data){
+    const data = await TaskModel.find();
+    res.status(200).json(data);
 
-        if( err ){
-            res.status(500).json({message: "An Error has Ocurred"});
-        }
-        else{
-            res.status(200).json(data);
-        }
-    });
 });
 
-
-
-app.post('/editdata', function( req ,res) {
+app.post('/editdata', async function( req ,res) {
 
     console.log( ' edit Data =>'+req.session.isLoggedIn);
 
@@ -129,68 +134,41 @@ app.post('/editdata', function( req ,res) {
         return;
     }
 
-    readAllDataFromFile( function( err, data ) {
-        if( err )
-        {
-            res.status(500).json({ update :'failed'});
-            return;
-        }
+      const obj = req.body;
+      const task = await TaskModel.findById(obj.id);
 
-            const obj = req.body;
-            // data[obj.id-1].task = obj.data;
+      const data = {
+        task: obj.data,
+        priority: task.priority,
+        filename: task.filename,
+        saved: task.saved
+      }
 
-            data.forEach( function (todo, idx) {
-                if( todo.id === obj.id )
-                {
-                    data[idx].task = obj.data;
-                }
-            });
-
-            fs.writeFile( './db/logs.json', JSON.stringify(data), function(err) {
-                if(err){
-                    res.status(500).json({ update :'failed'});
-                    return;
-                }
-
-                res.status(200).json(data)
-            });
+      const result = await TaskModel.findByIdAndUpdate( obj.id, data )
+      console.log(result);
+      res.status(200).json({result:'success'});
+           
     });
-})
 
-app.post('/taskDone', function( req, res){
+app.post('/taskDone', async function( req, res){
 
-    readAllDataFromFile( function(err, data){
-        if( err )
-        {
-            res.status(500).json({result:'Failure in reading the file'});
-            return;
-        }
+    const id = req.body.id;
+    
+    const task = await TaskModel.findById(id);
 
-        data.forEach( function(todo,idx){
+    const data = {
+        task: task.data,
+        priority: task.priority,
+        filename: task.filename,
+        saved: 'yes'
+      }
 
-            let a = todo.id;
-            let b = req.body.id;
-
-            if( todo.id === req.body.id ){
-                data[idx].saved = 'yes';
-            }
-        });
-
-       fs.writeFile('./db/logs.json', JSON.stringify(data), function(err){
-        if(err)
-        {
-            res.status(500).json({result:'Failure in writing the file'});
-            return;
-        }
-
-        res.status(200).json({result:'Data updated successfully'})
-
-       });
-    });
+      const result = await TaskModel.findByIdAndUpdate( id, data )
+      res.status(200).json({result:'success'});
 
 });
 
-app.post( '/deletetodo', function( req, res ) {
+app.post( '/deletetodo', async function( req, res ) {
 
     if( !req.session.isLoggedIn )
     {
@@ -200,31 +178,12 @@ app.post( '/deletetodo', function( req, res ) {
 
     const selectedId = req.body.id;
 
-    readAllDataFromFile( function( err, data ){
-        if( err ){
-            res.status(500).json({delete:'failure'});
-            return;
-        }
-        else{
+    const result = await TaskModel.findByIdAndDelete(selectedId);
 
-            data.forEach( function(todo, idx){
-                
-                if( todo.id === selectedId )
-                {
-                    data.splice(idx,1);
-                }
-            });
+    res.status(200).json({deletion:'success'})
+});
 
-            fs.writeFile( './db/logs.json', JSON.stringify(data), function( err ){
-                if( err ){
-                    res.status(500).send('failure');
-                }
-            });
 
-            res.status(200).json({deletion:'success'})
-        }
-    })
-})
 
 app.get( '/signup', function( req, res){
     res.render('signup', {error: null })
@@ -233,7 +192,9 @@ app.get( '/signup', function( req, res){
 app.post('/signup', async function( req, res) {
     
     try {
-        const data = await readAllDataFromFilePr( './db/users.json');
+        // const data = await readAllDataFromFilePr( './db/users.json');
+        const data = await UserModel.find();
+        // console.log(data);
         let flag = true;
 
         data.forEach( function(user){
@@ -248,17 +209,21 @@ app.post('/signup', async function( req, res) {
 
     if (flag) {
 
-            data.push(req.body);
-            fs.writeFileSync('./db/users.json', JSON.stringify(data), function(err){
-                if(err){
-                    res.status(500).json({result:'error in  writing a file'});
-                }
-            });
-            res.redirect('/login');
+        const doc = {
+            username: req.body.username,
+            password: req.body.password
+        }
+
+        const result = await UserModel.create(doc);
+        console.log(result)
+        res.redirect('/')
+
     }
 
     } catch (error) {
-        res.status(500).json({result:'error in  reading a file'});
+        console.log(error)
+        res.status(500).send({result:error});
+        
     }
 
 })
@@ -282,11 +247,11 @@ app.get('/login', function( req,res ){
 
 app.post('/login', async function( req,res ){
 
-    
     try {
 
         let flag = false;
-        const data = await readAllDataFromFilePr('./db/users.json');
+        // const data = await readAllDataFromFilePr('./db/users.json');
+        const data = await UserModel.find();
 
         data.forEach( function( user ){
             
@@ -351,9 +316,7 @@ app.get('/scripts/todoScript.js', function( req, res){
     res.sendFile(__dirname + '/scripts/todoScript.js')
 } )
 
-app.listen( 3000, function() {
-    console.log("Server is running on http://localhost:3000");
-})
+
 
 
 function readAllDataFromFilePr( path )
