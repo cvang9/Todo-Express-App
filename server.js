@@ -4,6 +4,7 @@ const multer = require('multer');
 const mongodb = require('./db/connectdb.js');
 const UserModel = require('./db/users/users.js');
 const TaskModel = require('./db/tasks/tasks.js');
+const bcrypt = require('bcrypt')
 
 
 mongodb.init()
@@ -192,38 +193,28 @@ app.get( '/signup', function( req, res){
 app.post('/signup', async function( req, res) {
     
     try {
-        // const data = await readAllDataFromFilePr( './db/users.json');
-        const data = await UserModel.find();
-        // console.log(data);
-        let flag = true;
-
-        data.forEach( function(user){
-
-            if( user.username === req.body.username && user.password === req.body.password )
-            {
-                res.render('signup', {error: 'User already exists'})
-                flag = false;
-            }
-        });
+        
+        const data = await UserModel.findOne({username:req.body.username});
+        
+          
+        if( data != undefined ){
+           return res.render('signup',{error: 'Username already taken'});
+        }
 
 
-    if (flag) {
-
+        const hash = await bcrypt.hash(req.body.password, 10)
         const doc = {
             username: req.body.username,
-            password: req.body.password
+            password: hash
         }
 
         const result = await UserModel.create(doc);
         console.log(result)
         res.redirect('/')
 
-    }
-
     } catch (error) {
         console.log(error)
         res.status(500).send({result:error});
-        
     }
 
 })
@@ -248,30 +239,79 @@ app.get('/login', function( req,res ){
 app.post('/login', async function( req,res ){
 
     try {
+        const result = await UserModel.findOne({username:req.body.username});
 
-        let flag = false;
-        // const data = await readAllDataFromFilePr('./db/users.json');
-        const data = await UserModel.find();
-
-        data.forEach( function( user ){
-            
-            if( user.username === req.body.username && user.password === req.body.password )
-            {
-                req.session.isLoggedIn = true;
-                req.session.username = user.username;
-                res.redirect('/');
-                flag = true;
-            }
-        });
-
-        if (!flag) {
-            res.render('login', {error:'Invalid User credentials'});
+        if( result == undefined )
+           return res.render('login',{error: "Invalid user credentials"})
+           
+        const isMatch = await bcrypt.compare(req.body.password, result.password);
+       
+        if( result.email === req.body.email && isMatch )
+        {
+            req.session.isLoggedIn = true;
+            req.session.username = req.body.username;
+            return res.redirect('/')
         }
+            
+        else 
+            return res.render('login',{error: "Invalid user credentials"})
+
     } catch (error) {
-        // res.status(500).json({result:" Error in  reading a file"})
-        throw error;
+        console.log(error);
+        res.json({success:false}); 
     }
+
+    // try {
+
+    //     let flag = false;
+    //     // const data = await readAllDataFromFilePr('./db/users.json');
+    //     const data = await UserModel.find();
+    //     const hash = await bcrypt.hash(req.body.password, 10)
+    //     console.log(hash)
+
+    //     data.forEach( function( user ){
+            
+    //         if( user.username === req.body.username && user.password == hash )
+    //         {
+    //             req.session.isLoggedIn = true;
+    //             req.session.username = user.username;
+    //             res.redirect('/');
+    //             flag = true;
+    //         }
+    //     });
+
+    //     if (!flag) {
+    //         res.render('login', {error:'Invalid User credentials'});
+    //     }
+    // } catch (error) {
+    //     // res.status(500).json({result:" Error in  reading a file"})
+    //     throw error;
+    // }
 });
+
+// function catchPassword( cred ){
+//     return new Promise( async function(resolve,reject){
+//         try {
+            
+//             const data = await UserModel.find();
+    
+//             data.forEach( async function( user ){
+                
+//                 if( user.username === cred.username  )
+//                 {
+//                      const result = await bcrypt.compare(cred.password, user.password)
+//                     if (result) {
+
+//                         resolve(null,true)
+//                     }
+//                 }
+//             });
+//             resolve(null, false );
+//         } catch (error) {
+//             reject(error)
+//         }
+//     });
+// }
 
 
 app.get('/about', function( req, res ){
@@ -317,85 +357,4 @@ app.get('/scripts/todoScript.js', function( req, res){
 } )
 
 
-
-
-function readAllDataFromFilePr( path )
-{
-    return new Promise( function( resolve, reject ){
-
-        fs.readFile( path, 'utf-8', function(err,data) {
-            if( err )
-            {
-                reject( err );
-            }
-            else{
-                if( data.length === 0 )
-                {
-                    data = "[]"
-                }
-                
-                try{
-                    data = JSON.parse(data);
-                    resolve(data);
-                }
-                catch(err){
-                    reject(err);
-                }
-                
-            }
-         });
-
-    })
-}
-
-function readAllDataFromFile( callback, path='./db/logs.json' )
-{
-    fs.readFile( path, 'utf-8', function(err,data) {
-        if( err )
-        {
-            callback( err );
-            return;
-        }
-        else{
-            if( data.length === 0 )
-            {
-                data = "[]"
-            }
-            
-            try{
-                data = JSON.parse(data);
-                callback( null, data);
-            }
-            catch(err){
-                callback(err);
-            }
-            
-        }
-    });
-}
-
-function writeToFile( todo, callback )
-{
-    readAllDataFromFile( function( err, data ){
-        if( err )
-        {
-            callback(err);
-            return;
-        }
-        else{
-
-
-            data.push(todo);
-
-            fs.writeFile( './db/logs.json', JSON.stringify(data), function(err) {
-                if(err){
-                    callback(err);
-                    return;
-                }
-                
-            })
-        }
-    })
-    callback(null);
-}
 
